@@ -27,9 +27,9 @@ glm::mat4 ProjectionMatrix;
 glm::mat4 sun_ModelMatrix = glm::mat4(1.0f);
 
 glm::vec3 lightPosition=glm::vec3(0,0,0);
-glm::vec3 position = glm::vec3( 20, 20, 20 );
-float horizontalAngle = 3.92;
-float verticalAngle = 2.35f - 3.14f;
+glm::vec3 position = glm::vec3( 0,0, 30 );
+float horizontalAngle = 3.14;
+float verticalAngle = 0;
 float initialFoV = 45.0f;
 float speed = 3.f; // 3 units / second
 float mouseSpeed = 0.005f;
@@ -42,7 +42,7 @@ GLuint modelMatrixID;
 GLuint viewMatrixID;
 GLuint lightPositionID;
 
-
+bool paused;
 
 GLuint loadShaders(const char * vertex_file_path,const char * fragment_file_path)
 {
@@ -264,10 +264,15 @@ void computeMatricesFromInputs()
 //        cout<<"space postion reset!"<<endl;
     }
 
-//    cout<<"Now you are at:("<<position.x<<","<<position.y<<","<<position.z<<")"<<endl;
+    cout<<"Now you are at:("<<position.x<<","<<position.y<<","<<position.z<<"),with verticalAngle="<<verticalAngle<<",horizontalAngle"<<horizontalAngle<<endl;
+
+
+    if(glfwGetKey(window, GLFW_KEY_P ) == GLFW_PRESS )
+    {
+        paused = (paused)?false:true;
+    }
     
-    
-    float FoV = initialFoV ;//- 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
+    float FoV = initialFoV ;
     ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
     ViewMatrix       = glm::lookAt(
                                    position,           // Camera is here
@@ -353,7 +358,7 @@ int main(int argc, const char * argv[])
     glBindVertexArray(vertexArray);
 
 
-    string objPath = "./object/ball_hd.obj";
+    string objPath = "./object/ball_hd2.obj";
     string texturePath = "./texture/sun_3000x1500.png";
     Planet sun = Planet(objPath,texturePath,1.5,true);
 
@@ -400,11 +405,14 @@ int main(int argc, const char * argv[])
 //        glEnableVertexAttribArray(2);
 //        glEnableVertexAttribArray(3);
 
+        if(!paused)
+        {
+            earth.update();
+            moon.update(earth.get_model_matrix());
+            metalPlanet.update();
+            gasPlanet.update();
+        }
 
-        earth.update();
-        moon.update(earth.get_model_matrix());
-        metalPlanet.update();
-        gasPlanet.update();
 
         draw(earth);
         draw(sun);
